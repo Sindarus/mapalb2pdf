@@ -1,4 +1,4 @@
-# mapalb to pdf
+# mapalb2pd
 
 ## Requirements
 * mdbtools: `sudo apt install mdbtools`
