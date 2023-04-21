@@ -26,10 +26,10 @@ PAGE_SIZE = (841.89, 595.27)
 
 FONT_SIZE_CORRECT_FACTOR = 75/100
 
-DO_ROTATE = False
-ZOOM_ROTATE = False
-CLIP_IMAGES = False
-DRAW_BORDER = True
+DO_ROTATE = True
+ZOOM_ROTATE = True
+CLIP_IMAGES = True
+DRAW_BORDER = False
 
 
 def parse_my_args():
