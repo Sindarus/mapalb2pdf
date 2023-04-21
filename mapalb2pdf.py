@@ -239,7 +239,7 @@ def run_script():
         # -2 : quatrieme de couv
         if page_nb <= 0:
             continue
-        if page_nb > 10:
+        if page_nb > 144:
             continue
         print("Drawing page {}".format(page_nb))
 
