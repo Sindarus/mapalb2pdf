@@ -109,90 +109,19 @@ def draw_image(canvas, image):
 
     rotation_x_margin = 0
     rotation_y_margin = 0
-    effective_rotation_x_margin = 0
-    effective_rotation_y_margin = 0
     if DO_ROTATE:
         rotation_angle = 360-image['ImageRotationAngle']
         canvas.rotate(rotation_angle)
         if ZOOM_ROTATE:
-            if rotation_angle >= 0:
-                rotation_x_margin = compute_zomming_margin_x(image, 360-image['ImageRotationAngle'])
-                rotation_y_margin = (image['LastHeight']/image['LastWidth']) * rotation_x_margin
-            else:
-                rotation_y_margin = compute_zomming_margin_y(image, 360-image['ImageRotationAngle'])
-                rotation_x_margin = (image['LastWidth']/image['LastHeight']) * rotation_y_margin
+            angle_reduced = rotation_angle if rotation_angle <= 180 else 360 - rotation_angle
+            percent_zoom = (1.2/100) * angle_reduced
+            rotation_x_margin = image['LastWidth'] * percent_zoom
+            rotation_y_margin = image['LastHeight'] * percent_zoom
 
-            natural_x_margin = (image['LastWidth'] - image['Width']) / 2
-            natural_y_margin = (image['LastHeight'] - image['Height']) / 2
-
-            if rotation_x_margin - natural_x_margin <= 0 and rotation_y_margin - natural_y_margin <= 0:
-                pass # do nothing
-            if rotation_x_margin - natural_x_margin <= 0 or rotation_y_margin - natural_y_margin <= 0:
-                effective_rotation_x_margin = rotation_x_margin
-                effective_rotation_y_margin = rotation_y_margin
-            else:
-                if rotation_x_margin - natural_x_margin > rotation_y_margin - natural_y_margin:
-                    effective_rotation_x_margin = rotation_x_margin - natural_x_margin
-                    effective_rotation_y_margin = (image['LastHeight']/image['LastWidth']) * effective_rotation_x_margin
-                else:
-                    effective_rotation_y_margin = rotation_y_margin - natural_y_margin
-                    effective_rotation_x_margin = (image['LastWidth']/image['LastHeight']) * effective_rotation_y_margin
-
-            print("(x, y): ({}, {})".format(rotation_y_margin, rotation_x_margin))
-
-    canvas.drawImage(image_path, -image['LastWidth']/2 - effective_rotation_x_margin, -image['LastHeight']/2 - effective_rotation_y_margin,
-                     width=image['LastWidth'] + 2*effective_rotation_x_margin, height=image['LastHeight'] + 2*effective_rotation_y_margin)
+    canvas.drawImage(image_path, -image['LastWidth']/2 - rotation_x_margin, -image['LastHeight']/2 - rotation_y_margin,
+                     width=image['LastWidth'] + 2*rotation_x_margin, height=image['LastHeight'] + 2*rotation_y_margin)
     canvas.restoreState()
     if DRAW_BORDER: canvas.drawPath(clipping_path, stroke=1)
-    
-    
-def compute_zomming_margin_x(image, rotation_d):
-    rotation_r = math.radians(rotation_d)
-    top_right_coord = (image['Width']/2, image['Height']/2)
-    diag = math.sqrt((image['Height'])**2 + (image['Width'])**2)
-
-    # tan(a) = op/adj => a = arctan(op/adj)
-    diag_angle = math.atan(image["Height"]/image["Width"])
-    x_diff = (math.cos(diag_angle + rotation_r) - math.cos(diag_angle)) * diag
-    y_diff = (math.sin(diag_angle + rotation_r) - math.sin(diag_angle)) * diag
-    new_top_right_coord = (top_right_coord[0]+x_diff, top_right_coord[1]+y_diff)
-
-    bottom_right_coord = (image['Width']/2, -image['Height']/2)
-    new_bottom_right_coord = (bottom_right_coord[0]+y_diff, bottom_right_coord[1]-x_diff)
-    a = norm(new_bottom_right_coord, new_top_right_coord)
-    b = norm(new_bottom_right_coord, top_right_coord)
-    c = norm(new_top_right_coord, top_right_coord)
-    p = (a+b+c)/2
-    area = math.sqrt(p*(p-a)*(p-b)*(p-c))
-
-    # area = (1/2) * h * a => h = (area * 2) / a
-    return (area * 2) / a
-
-def compute_zomming_margin_y(image, rotation_d):
-    rotation_r = math.radians(rotation_d)
-    top_right_coord = (image['Width']/2, image['Height']/2)
-    diag = math.sqrt((image['Height'])**2 + (image['Width'])**2)
-
-    # tan(a) = op/adj => a = arctan(op/adj)
-    diag_angle = math.atan(image["Height"]/image["Width"])
-    x_diff = (math.cos(diag_angle + rotation_r) - math.cos(diag_angle)) * diag
-    y_diff = (math.sin(diag_angle + rotation_r) - math.sin(diag_angle)) * diag
-    new_top_right_coord = (top_right_coord[0]+x_diff, top_right_coord[1]+y_diff)
-
-    top_left_corner = (image['Width']/2, -image['Height']/2)
-    new_top_left_corner = (top_left_corner[0]+y_diff, top_left_corner[1]+x_diff)
-    a = norm(new_top_left_corner, new_top_right_coord)
-    b = norm(new_top_left_corner, top_right_coord)
-    c = norm(new_top_right_coord, top_right_coord)
-    p = (a+b+c)/2
-    area = math.sqrt(p*(p-a)*(p-b)*(p-c))
-
-    # area = (1/2) * h * a => h = (area * 2) / a
-    return (area * 2) / a
-
-
-def norm(p1, p2):
-    return math.sqrt((p1[0]-p2[0])**2 + (p1[1]-p2[1])**2)
 
 
 def draw_text(canvas, text):
