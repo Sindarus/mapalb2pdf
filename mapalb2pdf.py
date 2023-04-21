@@ -93,10 +93,10 @@ def draw_image(canvas, image):
     zone_top_left_corner_coords = (image["LeftPos"], PAGE_SIZE[1] - image["TopPos"])
     zone_bottom_left_corner_coords = (zone_top_left_corner_coords[0], zone_top_left_corner_coords[1] - image['Height'])
 
-    image_top_left_corner_coords = (
-    zone_top_left_corner_coords[0] - image['LastLeft'], zone_top_left_corner_coords[1] + image['LastTop'])
-    image_bottom_left_corner_coords = (
-    image_top_left_corner_coords[0], image_top_left_corner_coords[1] - image['LastHeight'])
+    image_top_left_corner_coords = (zone_top_left_corner_coords[0] - image['LastLeft'],
+                                    zone_top_left_corner_coords[1] + image['LastTop'])
+    image_bottom_left_corner_coords = (image_top_left_corner_coords[0],
+                                       image_top_left_corner_coords[1] - image['LastHeight'])
 
     clipping_path = canvas.beginPath()
     clipping_path.rect(x=zone_bottom_left_corner_coords[0], y=zone_bottom_left_corner_coords[1],
@@ -104,7 +104,8 @@ def draw_image(canvas, image):
 
     canvas.saveState()
     if CLIP_IMAGES: canvas.clipPath(clipping_path, stroke=0)
-    canvas.translate(image_bottom_left_corner_coords[0]+image['LastWidth']/2, image_bottom_left_corner_coords[1]+image['LastHeight']/2)
+    canvas.translate(image_bottom_left_corner_coords[0]+image['LastWidth']/2,
+                     image_bottom_left_corner_coords[1]+image['LastHeight']/2)
 
     rotation_x_margin = 0
     rotation_y_margin = 0
@@ -201,29 +202,6 @@ def draw_text(canvas, text):
     text_top_left_corner_coords = (text["LeftPos"], PAGE_SIZE[1] - text["TopPos"])
     text_bottom_left_corner_coords = (text_top_left_corner_coords[0], text_top_left_corner_coords[1] - text["Height"])
 
-    # canvas.saveState()
-    # canvas.setFillColorRGB(1, 0, 0)
-    # canvas.rect(text_bottom_left_corner_coords[0], text_bottom_left_corner_coords[1]-(7/30)*parsed_text["style"]["font_size"],
-    #             text["Width"], parsed_text["style"]["font_size"],
-    #             fill=1, stroke=0)
-    # canvas.restoreState()
-
-    # rect showing the position where we are drawing
-    # canvas.saveState()
-    # canvas.setFillColorRGB(1, 0, 0)
-    # canvas.rect(text_bottom_left_corner_coords[0]+LEFT_POS_CORRECT, text_bottom_left_corner_coords[1]+BOTTOM_POS_CORRECT,
-    #             text["Width"], paragraph["style"]["font_size"],
-    #             fill=1, stroke=0)
-    # canvas.restoreState()
-
-    # rect showing the box described in the data
-    # canvas.saveState()
-    # canvas.setFillColorRGB(1, 0, 0)
-    # canvas.rect(text_bottom_left_corner_coords[0], text_bottom_left_corner_coords[1],
-    #             text["Width"], text["Height"],
-    #             fill=1, stroke=0)
-    # canvas.restoreState()
-
     canvas.saveState()
     canvas.setFont("book-antiqua-bold", effective_font_size)
     canvas.setFillColorRGB(
@@ -243,9 +221,6 @@ def draw_text(canvas, text):
 
     canvas.restoreState()
 
-    # canvas.beginText()
-    # canvas.drawCentredString()
-
 
 def html_colour_to_rgb(html_colour):
     return {
@@ -256,7 +231,6 @@ def html_colour_to_rgb(html_colour):
 
 
 def parse_mapalb_xml_text(xml_str):
-    attributes_to_copy = ["TextAlignment", "FontSize", "Foreground"]
     out = {
         "style": {
             "font_size": None,
