@@ -13,6 +13,9 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
 
+class IncoherentDataError(Exception):
+    pass
+
 PATH_REPLACE_RULES = [
     (r'C:\Users\Florence\Pictures\2015\Roadtrip\1Best of roadtrip', '/home/sindarus/mapalb2pdf/images/all2/'),
     (r'C:\Users\Florence\Pictures\2015\Roadtrip\J11 - 31 juillet Creuse (Limoges - Oradour sur Glane)', '/home/sindarus/mapalb2pdf/images/all2/'),
@@ -57,6 +60,8 @@ def filter_by_page_nb(page_nb, items):
 
 def get_normed_image_path(image, replace_rules):
     path = image["ImagePath"]
+    if not isinstance(path, str):
+        raise IncoherentDataError("Image path must be a string, got '{}' instead.".format(type(path)))
     for rule in replace_rules:
         if path.startswith(rule[0]):
             path = path.replace(rule[0], "")
@@ -73,7 +78,17 @@ def draw_image(canvas, image):
     LastLeft et LastTop : distance entre le coin de l'image et le coin de la zone d'image
     LastHeight et lastWidth : Taille réelle de l'image
     """
-    image_path = get_normed_image_path(image, PATH_REPLACE_RULES)
+    try:
+        image_path = get_normed_image_path(image, PATH_REPLACE_RULES)
+    except IncoherentDataError as e:
+        print("WARNING: Could not load image '{book_image_id}' for page '{page_no}', at path '{image_path}'. "
+              "Got IncoherentDataError : {msg}.".format(
+            book_image_id=image["BookImageId"],
+            page_no=image["PageNo"],
+            image_path=image["ImagePath"],
+            msg=str(e)
+        ))
+        return # skip image
 
     zone_top_left_corner_coords = (image["LeftPos"], PAGE_SIZE[1] - image["TopPos"])
     zone_bottom_left_corner_coords = (zone_top_left_corner_coords[0], zone_top_left_corner_coords[1] - image['Height'])
